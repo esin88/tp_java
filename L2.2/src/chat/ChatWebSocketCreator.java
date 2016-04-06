@@ -18,7 +18,7 @@ public class ChatWebSocketCreator implements WebSocketCreator {
     private Set<ChatWebSocket> users;
 
     public ChatWebSocketCreator() {
-        this.users = Collections.newSetFromMap(new ConcurrentHashMap<ChatWebSocket, Boolean>());
+        this.users = Collections.newSetFromMap(new ConcurrentHashMap<>());
     }
 
     @Override

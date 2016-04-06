@@ -1,0 +1,63 @@
+﻿<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Jetty WebSocket: Chat</title>
+    <script type="text/javascript">
+        var ws;
+
+        init = function () {
+            ws = new WebSocket("ws://127.0.0.1:8080/ping");
+            ws.onopen = function (event) {
+
+            }
+            ws.onmessage = function (event) {
+                var content = {};
+                var responseContent = {};
+                var response = {};
+                var message = JSON.parse(event.data)
+                if (message.type === "pinger.requests.PingData$Request") {
+                    content = JSON.parse(message.content);
+                    responseContent.id = content.id;
+                    responseContent.timestamp = new Date().getTime();
+                    response.type = "pinger.requests.PingData$Response";
+                    response.content = JSON.stringify(responseContent);
+                    ws.send(JSON.stringify(response));
+                }
+                if (message.type === "pinger.requests.GetPing$Response") {
+                    content = JSON.parse(message.content);
+                    document.getElementById("ping").innerHTML = content.ping;
+                    document.getElementById("time-shift").innerHTML = content.clientTimeShift;
+                }
+            }
+            ws.onclose = function (event) {
+
+            }
+        };
+
+        var getPingMessage = {};
+        getPingMessage.type="pinger.requests.GetPing$Request";
+        getPingMessage.content="{}";
+        var refreshPingMessage = {};
+        refreshPingMessage.type="pinger.requests.RefreshPing$Request";
+        refreshPingMessage.content="{}";
+
+
+        function updatePing() {
+            ws.send(JSON.stringify(getPingMessage));
+        }
+        function refreshPing() {
+            ws.send(JSON.stringify(refreshPingMessage));
+        }
+    </script>
+</head>
+<body onload="init();">
+<div>
+    ping:<div id="ping" style="font-size: large; color:#824D6E; font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif"></div>
+</div>
+<div>
+    timeShift:<div id="time-shift" style="font-size: large; color:#4D5482; font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif"></div>
+</div>
+<button onclick="updatePing()">Update ping</button>
+<button onclick="refreshPing()">Refresh ping</button>
+</body>
+</html>
