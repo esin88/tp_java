@@ -11,6 +11,8 @@ import java.io.IOException;
  * Created by Solovyev on 05/04/16.
  */
 public interface PingService {
+    boolean hasAlreadyRegistred(@NotNull String userName);
+
     void registerUser(@NotNull String userName, @NotNull PingWebSocket pingWebSocket);
 
     void unregisterUser(@NotNull String userName);
@@ -22,9 +24,9 @@ public interface PingService {
     @Nullable
     TimingData getTimings(@NotNull String userName);
 
-    void updatePing(@NotNull String userName);
+    void refreshPing(@NotNull String userName);
 
-    void updatePingAll();
+    void refreshPingAll();
 
     void shutdown();
 

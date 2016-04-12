@@ -3,16 +3,18 @@ package pinger;
 import base.AuthService;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.sun.istack.internal.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import websocket.HandleException;
 import websocket.Message;
 import websocket.MessageHandlerContainer;
@@ -40,6 +42,8 @@ public class PingWebSocket {
     private String owner;
     @Nullable
     private Session ownerSession;
+    @Nullable
+    private RemoteEndpoint remoteEndpoint;
 
     public PingWebSocket(@NotNull String sessionId, @NotNull AuthService authService, @NotNull PingService pingService, @NotNull MessageHandlerContainer messageHandlers) {
         this.authService = authService;
@@ -54,7 +58,6 @@ public class PingWebSocket {
         if (owner == null) {
             return;
         }
-
 
         final Message message;
         try {
@@ -79,10 +82,15 @@ public class PingWebSocket {
             session.close(Response.SC_FORBIDDEN, "Your access to this resource is denied");
             return;
         }
+        if (pingService.hasAlreadyRegistred(userName)) {
+            session.close(Response.SC_FORBIDDEN, "You already has open session connected to this resource");
+            return;
+        }
         owner = userName;
         ownerSession = session;
+        remoteEndpoint = session.getRemote();
         pingService.registerUser(userName, this);
-        pingService.updatePing(userName);
+        pingService.refreshPing(userName);
     }
 
     public void sendMessage(@NotNull Message message) throws IOException {
@@ -91,8 +99,8 @@ public class PingWebSocket {
         }
         try {
             //noinspection ConstantConditions
-            ownerSession.getRemote().sendString(new Gson().toJson(message));
-        } catch (IOException e) {
+            remoteEndpoint.sendString(new Gson().toJson(message));
+        } catch (IOException | WebSocketException e) {
             LOGGER.debug("error sending ping request", e);
         }
     }

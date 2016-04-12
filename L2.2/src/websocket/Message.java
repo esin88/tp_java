@@ -5,7 +5,8 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Created by Solovyev on 06/04/16.
  */
-public class Message {
+public class
+Message {
     @NotNull
     private String type;
     @NotNull

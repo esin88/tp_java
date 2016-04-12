@@ -35,12 +35,11 @@ public class PingServiceImpl implements PingService {
     @NotNull
     private final Map<Long, Long> pendingRequests = new ConcurrentHashMap<>();
     @NotNull
-    private final Map<String, TimingData> timings = new ConcurrentHashMap<>();
+    private final Map<String, TimingData> user2timings = new ConcurrentHashMap<>();
     @NotNull
     private final Executor pingUpdater = Executors.newSingleThreadExecutor();
     @NotNull
     private final ScheduledExecutorService cleanerExecutor = Executors.newScheduledThreadPool(1);
-
 
     @SuppressWarnings("FieldCanBeLocal")
     @NotNull
@@ -55,14 +54,19 @@ public class PingServiceImpl implements PingService {
         });
     };
 
-
     public PingServiceImpl() {
         cleanerExecutor.scheduleAtFixedRate(cleaner, CLEANER_PERIOD_SECONDS, CLEANER_PERIOD_SECONDS, TimeUnit.MILLISECONDS);
     }
 
     @Override
+    public boolean hasAlreadyRegistred(@NotNull String userName) {
+        return user2socket.containsKey(userName);
+    }
+
+    @Override
     public void registerUser(@NotNull String userName, @NotNull PingWebSocket pingWebSocket) {
         //noinspection resource
+
         user2socket.put(userName, pingWebSocket);
     }
 
@@ -71,7 +75,7 @@ public class PingServiceImpl implements PingService {
         @SuppressWarnings("resource") final boolean isRemoved = user2socket.remove(userName) != null;
         if (isRemoved) {
             listners.forEach(listner -> listner.notifyUserDisconnect(userName));
-            timings.remove(userName);
+            user2timings.remove(userName);
         }
 
     }
@@ -88,7 +92,7 @@ public class PingServiceImpl implements PingService {
             return;
         }
         final long clientTimeShift = now - (clientTimestamp + ping / 2);
-        timings.put(userName, new TimingData(ping, clientTimeShift));
+        user2timings.put(userName, new TimingData(ping, clientTimeShift));
     }
 
     @Override
@@ -99,11 +103,11 @@ public class PingServiceImpl implements PingService {
     @Nullable
     @Override
     public TimingData getTimings(@NotNull String userName) {
-        return timings.get(userName);
+        return user2timings.get(userName);
     }
 
     @Override
-    public void updatePing(@NotNull String userName) {
+    public void refreshPing(@NotNull String userName) {
         if (!user2socket.containsKey(userName)) {
             return;
         }
@@ -128,11 +132,9 @@ public class PingServiceImpl implements PingService {
         });
     }
 
-
-
     @Override
-    public void updatePingAll() {
-
+    public void refreshPingAll() {
+        user2socket.keySet().forEach(this::refreshPing);
     }
 
     @Override

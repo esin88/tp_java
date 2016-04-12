@@ -31,6 +31,6 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     @Override
     public void notifyGameOver(GameUser user, boolean win) {
-        userSockets.get(user.getMyName()).gameOver(user, win);
+        userSockets.get(user.getMyName()).gameOver(win);
     }
 }

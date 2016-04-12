@@ -1,7 +1,10 @@
 package mechanics;
 
 import base.GameUser;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.time.Clock;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,13 +14,16 @@ import java.util.Map;
  */
 public class GameSession {
     private final long startTime;
+    @NotNull
     private final GameUser first;
+    @NotNull
     private final GameUser second;
 
+    @NotNull
     private Map<String, GameUser> users = new HashMap<>();
 
-    public GameSession(String user1, String user2) {
-        startTime = new Date().getTime();
+    public GameSession(@NotNull String user1, @NotNull String user2) {
+        startTime = Clock.systemDefaultZone().millis();
         GameUser gameUser1 = new GameUser(user1);
         gameUser1.setEnemyName(user2);
 
@@ -31,23 +37,28 @@ public class GameSession {
         this.second = gameUser2;
     }
 
-    public GameUser getEnemy(String user) {
-        String enemyName = users.get(user).getEnemyName();
-        return users.get(enemyName);
+    @Nullable
+    public GameUser getEnemy(@NotNull String user) {
+        @SuppressWarnings("ConstantConditions")
+        String enemyName = users.containsKey(user) ? users.get(user).getEnemyName() : null;
+        return enemyName == null ? null : users.get(enemyName);
     }
 
+    @Nullable
     public GameUser getSelf(String user) {
         return users.get(user);
     }
 
     public long getSessionTime(){
-        return new Date().getTime() - startTime;
+        return Clock.systemDefaultZone().millis() - startTime;
     }
 
+    @NotNull
     public GameUser getFirst() {
         return first;
     }
 
+    @NotNull
     public GameUser getSecond() {
         return second;
     }

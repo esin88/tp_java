@@ -1,22 +1,28 @@
 package base;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 /**
  * @author v.chibrikov
  */
 public class GameUser {
+    @NotNull
     private final String myName;
+    @Nullable
     private String enemyName;
     private int myScore = 0;
     private int enemyScore = 0;
 
-    public GameUser(String myName) {
+    public GameUser(@NotNull String myName) {
         this.myName = myName;
     }
 
+    @NotNull
     public String getMyName() {
         return myName;
     }
-
+    @Nullable
     public String getEnemyName() {
         return enemyName;
     }
@@ -37,7 +43,7 @@ public class GameUser {
         enemyScore++;
     }
 
-    public void setEnemyName(String enemyName) {
+    public void setEnemyName(@NotNull String enemyName) {
         this.enemyName = enemyName;
     }
 }

@@ -30,9 +30,9 @@ public class Main {
         final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 
         final WebSocketService webSocketService = new WebSocketServiceImpl();
-        final GameMechanics gameMechanics = new GameMechanicsImpl(webSocketService);
-        final AuthService authService = new AuthServiceImpl();
         final PingService pingService = new PingServiceImpl();
+        final GameMechanics gameMechanics = new GameMechanicsImpl(webSocketService, pingService);
+        final AuthService authService = new AuthServiceImpl();
         final MessageHandlerContainer pingMessageHandlerContainer = new PingMessageHandlerContainer();
         pingMessageHandlerContainer.registerHandler(GetPing.Request.class, new GetPingHandler(pingService));
         pingMessageHandlerContainer.registerHandler(PingData.Response.class, new PingDataHandler(pingService));

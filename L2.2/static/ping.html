@@ -6,7 +6,7 @@
         var ws;
 
         init = function () {
-            ws = new WebSocket("ws://127.0.0.1:8080/ping");
+            ws = new WebSocket("ws://" + window.location.hostname + ":" + window.location.port + "/ping");
             ws.onopen = function (event) {
 
             }
@@ -22,15 +22,17 @@
                     response.type = "pinger.requests.PingData$Response";
                     response.content = JSON.stringify(responseContent);
                     ws.send(JSON.stringify(response));
+                    return;
                 }
                 if (message.type === "pinger.requests.GetPing$Response") {
                     content = JSON.parse(message.content);
                     document.getElementById("ping").innerHTML = content.ping;
                     document.getElementById("time-shift").innerHTML = content.clientTimeShift;
+                    return;
                 }
             }
             ws.onclose = function (event) {
-
+                clearInterval(intervalId);
             }
         };
 
@@ -48,6 +50,7 @@
         function refreshPing() {
             ws.send(JSON.stringify(refreshPingMessage));
         }
+        var intervalId = setInterval(updatePing, 1000);
     </script>
 </head>
 <body onload="init();">

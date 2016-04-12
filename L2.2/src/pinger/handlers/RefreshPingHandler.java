@@ -20,6 +20,6 @@ public class RefreshPingHandler extends MessageHandler<RefreshPing.Request> {
 
     @Override
     public void handle(@NotNull RefreshPing.Request message, @NotNull String userName) throws HandleException {
-        pingService.updatePing(userName);
+        pingService.refreshPing(userName);
     }
 }
