@@ -11,7 +11,7 @@
         var enemyName = "";
 
         init = function () {
-            ws = new WebSocket("ws://127.0.0.1:8080/gameplay");
+            ws = new WebSocket("ws://" + window.location.hostname + ":" + window.location.port +"/gameplay");
 
             ws.onopen = function (event) {
 
